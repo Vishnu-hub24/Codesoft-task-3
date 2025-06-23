@@ -1,0 +1,130 @@
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+using namespace std;
+
+char board[3][3];
+char player = 'X';
+char computer = 'O';
+
+void initializeBoard() {
+    char cell = '1';
+    for (int i = 0; i < 3; ++i)
+        for (int j = 0; j < 3; ++j)
+            board[i][j] = cell++;
+}
+
+void displayBoard() {
+    cout << "\n";
+    for (int i = 0; i < 3; ++i) {
+        cout << " ";
+        for (int j = 0; j < 3; ++j) {
+            cout << board[i][j];
+            if (j < 2) cout << " | ";
+        }
+        if (i < 2) cout << "\n---+---+---\n";
+    }
+    cout << "\n";
+}
+
+bool isValidMove(int cell) {
+    int r = (cell - 1) / 3;
+    int c = (cell - 1) % 3;
+    return cell >= 1 && cell <= 9 && board[r][c] != 'X' && board[r][c] != 'O';
+}
+
+void makeMove(int cell, char symbol) {
+    int r = (cell - 1) / 3;
+    int c = (cell - 1) % 3;
+    board[r][c] = symbol;
+}
+
+bool checkWin(char symbol) {
+    for (int i = 0; i < 3; ++i) {
+        if ((board[i][0] == symbol && board[i][1] == symbol && board[i][2] == symbol) ||
+            (board[0][i] == symbol && board[1][i] == symbol && board[2][i] == symbol))
+            return true;
+    }
+    if ((board[0][0] == symbol && board[1][1] == symbol && board[2][2] == symbol) ||
+        (board[0][2] == symbol && board[1][1] == symbol && board[2][0] == symbol))
+        return true;
+    return false;
+}
+
+bool isDraw() {
+    for (int i = 1; i <= 9; ++i) {
+        int r = (i - 1) / 3;
+        int c = (i - 1) % 3;
+        if (board[r][c] != 'X' && board[r][c] != 'O')
+            return false;
+    }
+    return true;
+}
+
+int getComputerMove() {
+    // Basic AI: pick first available move
+    for (int i = 1; i <= 9; ++i) {
+        if (isValidMove(i)) return i;
+    }
+    return -1; // No valid move
+}
+
+int main() {
+    srand(time(0));
+    char playAgain;
+
+    do {
+        initializeBoard();
+        bool gameOver = false;
+
+        cout << " Welcome to Tic-Tac-Toe (You = X, Computer = O)\n";
+        displayBoard();
+
+        while (!gameOver) {
+            // Player's turn
+            int move;
+            cout << "\nYour move (1-9): ";
+            cin >> move;
+
+            if (!isValidMove(move)) {
+                cout << " Invalid move! Try again.\n";
+                continue;
+            }
+
+            makeMove(move, player);
+            displayBoard();
+
+            if (checkWin(player)) {
+                cout << " You win!\n";
+                gameOver = true;
+                break;
+            }
+            if (isDraw()) {
+                cout << " It's a draw!\n";
+                gameOver = true;
+                break;
+            }
+
+            // Computer's turn
+            cout << "\nComputer is thinking...\n";
+            int aiMove = getComputerMove();
+            makeMove(aiMove, computer);
+            displayBoard();
+
+            if (checkWin(computer)) {
+                cout << " You lose! Computer wins.\n";
+                gameOver = true;
+            } else if (isDraw()) {
+                cout << " It's a draw!\n";
+                gameOver = true;
+            }
+        }
+
+        cout << "\n Play again? (y/n): ";
+        cin >> playAgain;
+
+    } while (playAgain == 'y' || playAgain == 'Y');
+
+    cout << "Thanks for playing!\n";
+    return 0;
+}
